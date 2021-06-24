@@ -2,23 +2,7 @@ const express = require('express')
 const router = express.Router()
 const actions = require('../../model');
 const Joi = require('joi');
-
-const schema = Joi.object({
-  name: Joi.string()
-    .alphanum()
-    .min(2)
-    .max(30)
-    .required(),
-
-  email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ua'] } })
-    .required(),
-
-  phone: Joi.required([
-    Joi.string(),
-    Joi.number()
-  ])
-})
+const { schema } = require('../../validations/contactsSchema');
 
 router.get('/', async (_, res) => {
   try {
