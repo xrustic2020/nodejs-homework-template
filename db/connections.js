@@ -1,16 +1,16 @@
-const MongoClient = require('mongodb').MongoClient
-const collections = {}
-
-const getCollections = () => collections
+const mongoose = require('mongoose')
 
 const mongoConnection = async () => {
-  const client = await MongoClient.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-  const db = client.db()
-  console.log('Database connection is success')
-  collections.contacts = db.collection('contacts')
+  await mongoose.connect(process.env.MONGO_DB_URL, {
+    promiseLibrary: global.Promise,
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+  })
+  console.log('Database connection successful')
 }
 
 module.exports = {
-  mongoConnection,
-  getCollections
+  mongoConnection
 }

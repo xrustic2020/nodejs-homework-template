@@ -1,12 +1,13 @@
-const ObjectID = require('mongodb').ObjectID
 const Joi = require('joi')
 const { schema } = require('../validations/contactsSchema')
+const Contact = require('../db/contactsModel')
 
 const listContacts = async (req, res) => {
   try {
-    const contacts = await req.db.contacts.find({}).toArray()
+    const contacts = await Contact.find()
     return res.status(200).json({ contacts })
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: 'Some thing wrongs... Try again with 5 min' })
   }
 }
@@ -14,7 +15,7 @@ const listContacts = async (req, res) => {
 const getContactById = async (req, res) => {
   const id = req.params.contactId
   try {
-    const contact = await req.db.contacts.findOne({ _id: ObjectID(id) })
+    const contact = await Contact.findById(id)
     return res.status(200).json({ contact })
   } catch (error) {
     console.log(error)
@@ -25,7 +26,7 @@ const getContactById = async (req, res) => {
 const removeContact = async (req, res) => {
   const id = req.params.contactId
   try {
-    await req.db.contacts.deleteOne({ _id: ObjectID(id) })
+    await Contact.findByIdAndRemove(id)
     return res.status(200).json({ message: 'contact deleted' })
   } catch (error) {
     return res.status(404).json({ message: 'Not found' })
@@ -35,8 +36,10 @@ const removeContact = async (req, res) => {
 const addContact = async (req, res) => {
   try {
     Joi.assert(req.body, schema)
-    const createdContact = await req.db.contacts.insertOne(req.body)
-    return res.status(201).json(...createdContact.ops)
+
+    const newContact = new Contact({ ...req.body })
+    const createdContact = await newContact.save()
+    return res.status(201).json(createdContact) //
   } catch (error) {
     res.status(400).json({ message: 'missing required name field' })
   }
@@ -47,8 +50,8 @@ const updateContact = async (req, res) => {
   if (Object.keys(req.body).length === 0) return res.status(400).json({ message: 'missing fields' })
   const { name, email, phone, favorite } = req.body
   try {
-    const updateContact = await req.db.contacts.findOneAndUpdate({ _id: ObjectID(id) }, { $set: { name, email, phone, favorite } }, { returnNewDocument: true })
-    return res.status(200).json(updateContact.value)
+    const updateContact = await Contact.findByIdAndUpdate(id, { $set: { name, email, phone, favorite } }, { new: true })
+    return res.status(200).json(updateContact) //
   } catch (error) {
     return res.status(404).json({ message: 'Not found' })
   }

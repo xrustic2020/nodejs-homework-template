@@ -5,12 +5,15 @@ const { mongoConnection } = require('../db/connections')
 const PORT = process.env.PORT || 3000
 
 const start = async () => {
-  await mongoConnection()
-
-  app.listen(PORT, (err) => {
-    if (err) console.log(`Error at server launch ${err}`)
-    console.log(`Server running. Use our API on port: ${PORT}`)
-  })
+  try {
+    await mongoConnection()
+    app.listen(PORT, () => {
+      console.log(`Server running. Use our API on port: ${PORT}`)
+    })
+  } catch (error) {
+    console.log(error.message)
+    process.exit(1)
+  }
 }
 
 start()
