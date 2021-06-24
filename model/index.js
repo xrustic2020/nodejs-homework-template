@@ -1,49 +1,57 @@
-const fs = require('fs').promises;
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const ObjectID = require('mongodb').ObjectID
+const Joi = require('joi')
+const { schema } = require('../validations/contactsSchema')
 
-const listContacts = async () => {
-  const data = await fs.readFile(path.join(__dirname, 'contacts.json'));
-  return JSON.parse(data);
-}
-
-const getContactById = async (contactId) => {
-  const data = JSON.parse(await fs.readFile(path.join(__dirname, 'contacts.json')));
-  return data.find(({ id }) => id === contactId)
-}
-
-const removeContact = async (contactId) => {
-  const data = JSON.parse(await fs.readFile(path.join(__dirname, 'contacts.json')));
-  const isFoundContact = data.find(({ id }) => id === contactId);
-  if (isFoundContact) {
-    const filteredContacts = data.filter(({ id }) => id !== contactId);
-    await fs.writeFile(path.join(__dirname, 'contacts.json'), JSON.stringify(filteredContacts), 'utf-8');
-    return true
-  } else {
-    return false;
+const listContacts = async (req, res) => {
+  try {
+    const contacts = await req.db.contacts.find({}).toArray()
+    return res.status(200).json({ contacts })
+  } catch (error) {
+    return res.status(500).json({ message: 'Some thing wrongs... Try again with 5 min' })
   }
 }
 
-const addContact = async (body) => {
-  const id = uuidv4();
-  const newContact = { id, ...body }
-
-  const contacts = JSON.parse(await fs.readFile(path.join(__dirname, 'contacts.json')));
-
-  contacts.push(newContact)
-  await fs.writeFile(path.join(__dirname, 'contacts.json'), JSON.stringify(contacts), 'utf-8')
-
-  return newContact;
+const getContactById = async (req, res) => {
+  const id = req.params.contactId
+  try {
+    const contact = await req.db.contacts.findOne({ _id: ObjectID(id) })
+    return res.status(200).json({ contact })
+  } catch (error) {
+    console.log(error)
+    return res.status(404).json({ message: 'Not found' })
+  }
 }
 
-const updateContact = async (contactId, body) => {
-  const contacts = JSON.parse(await fs.readFile(path.join(__dirname, 'contacts.json')));
-  const isFoundContact = contacts.find(({ id }) => id === contactId);
-  if (!isFoundContact) return false;
-  const index = contacts.indexOf(isFoundContact);
-  contacts.splice(index, 1, body)
-  await fs.writeFile(path.join(__dirname, 'contacts.json'), JSON.stringify(contacts), 'utf-8')
-  return body;
+const removeContact = async (req, res) => {
+  const id = req.params.contactId
+  try {
+    await req.db.contacts.deleteOne({ _id: ObjectID(id) })
+    return res.status(200).json({ message: 'contact deleted' })
+  } catch (error) {
+    return res.status(404).json({ message: 'Not found' })
+  }
+}
+
+const addContact = async (req, res) => {
+  try {
+    Joi.assert(req.body, schema)
+    const createdContact = await req.db.contacts.insertOne(req.body)
+    return res.status(201).json(...createdContact.ops)
+  } catch (error) {
+    res.status(400).json({ message: 'missing required name field' })
+  }
+}
+
+const updateContact = async (req, res) => {
+  const id = req.params.contactId
+  if (Object.keys(req.body).length === 0) return res.status(400).json({ message: 'missing fields' })
+  const { name, email, phone, favorite } = req.body
+  try {
+    const updateContact = await req.db.contacts.findOneAndUpdate({ _id: ObjectID(id) }, { $set: { name, email, phone, favorite } }, { returnNewDocument: true })
+    return res.status(200).json(updateContact.value)
+  } catch (error) {
+    return res.status(404).json({ message: 'Not found' })
+  }
 }
 
 module.exports = {
