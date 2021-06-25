@@ -1,6 +1,6 @@
-const Joi = require('joi');
+const Joi = require('joi')
 
-const schema = Joi.object({
+const addedContactSchema = Joi.object({
   name: Joi.string()
     .alphanum()
     .min(2)
@@ -18,5 +18,5 @@ const schema = Joi.object({
 })
 
 module.exports = {
-  schema
+  addedContactSchema
 }
