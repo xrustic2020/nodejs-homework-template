@@ -1,6 +1,9 @@
 const Joi = require('joi')
 const { addedContactSchema } = require('../validations/contactsSchema')
 const Contact = require('../db/contactsModel')
+const { signupUser, loginUser } = require('./usersModel')
+
+// TODO: Вынести логику с контактами в отдельный файл, а в индекс оставить только ипорты всего
 
 const listContacts = async (req, res) => {
   try {
@@ -73,5 +76,7 @@ module.exports = {
   removeContact,
   addContact,
   updateContact,
-  updateStatusContact
+  updateStatusContact,
+  signupUser,
+  loginUser
 }
