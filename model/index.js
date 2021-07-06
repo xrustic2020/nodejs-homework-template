@@ -6,6 +6,7 @@ const { signupUser, loginUser } = require('./usersModel')
 // TODO: Вынести логику с контактами в отдельный файл, а в индекс оставить только ипорты всего
 
 const listContacts = async (req, res) => {
+  console.log('req.user:', req.user) // auth middleware
   try {
     const contacts = await Contact.find()
     return res.status(200).json({ contacts })
