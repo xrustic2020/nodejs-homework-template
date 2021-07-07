@@ -8,9 +8,8 @@ const {
   updateContact,
   updateStatusContact
 } = require('../../model')
-const authCheck = require('../../middlewares/authCheck');
 
-router.get('/', authCheck, listContacts)
+router.get('/', listContacts)
 router.get('/:contactId', getContactById)
 router.post('/', addContact)
 router.patch('/:contactId/favorite', updateStatusContact)

@@ -6,10 +6,11 @@ const { signupUser, loginUser, logoutUser, getCurrentUser } = require('./usersMo
 // TODO: Вынести логику с контактами в отдельный файл, а в индекс оставить только ипорты всего
 
 const listContacts = async (req, res) => {
-  console.log('req.user:', req.user) // auth middleware
+  const { page = 1, limit = 5 } = req.query
   try {
-    const contacts = await Contact.find()
-    return res.status(200).json({ contacts })
+    const contacts = await Contact.paginate({ owner: req.user.id }, { page, limit })
+    const { docs, totalDocs } = contacts
+    return res.status(200).json({ contacts: docs, totalDocs, limit, page })
   } catch (error) {
     return res.status(500).json({ message: 'Some thing wrongs... Try again with 5 min' })
   }
@@ -18,7 +19,8 @@ const listContacts = async (req, res) => {
 const getContactById = async (req, res) => {
   const id = req.params.contactId
   try {
-    const contact = await Contact.findById(id)
+    const contact = await Contact.findOne({ _id: id, owner: req.user.id })
+    if (!contact) throw new Error()
     return res.status(200).json({ contact })
   } catch (error) {
     return res.status(404).json({ message: 'Not found' })
@@ -28,7 +30,7 @@ const getContactById = async (req, res) => {
 const removeContact = async (req, res) => {
   const id = req.params.contactId
   try {
-    await Contact.findByIdAndRemove(id)
+    await Contact.findOneAndDelete({ _id: id, owner: req.user.id })
     return res.status(200).json({ message: 'contact deleted' })
   } catch (error) {
     return res.status(404).json({ message: 'Not found' })
@@ -39,7 +41,7 @@ const addContact = async (req, res) => {
   try {
     Joi.assert(req.body, addedContactSchema)
 
-    const newContact = new Contact({ ...req.body })
+    const newContact = new Contact({ ...req.body, owner: req.user.id })
     const createdContact = await newContact.save()
     return res.status(201).json(createdContact)
   } catch (error) {
@@ -52,8 +54,14 @@ const updateContact = async (req, res) => {
   if (Object.keys(req.body).length === 0) return res.status(400).json({ message: 'missing fields' })
   const { name, email, phone, favorite } = req.body
   try {
-    const updateContact = await Contact.findByIdAndUpdate(id, { $set: { name, email, phone, favorite } }, { new: true })
-    return res.status(200).json(updateContact)
+    const updateContact = await Contact.findOneAndUpdate({ _id: id, owner: req.user.id }, { $set: { name, email, phone, favorite } }, { new: true })
+    const updatedData = {
+      name: updateContact.name,
+      email: updateContact.email,
+      phone: updateContact.phone,
+      favorite: updateContact.favorite
+    }
+    return res.status(200).json(updatedData)
   } catch (error) {
     return res.status(404).json({ message: 'Not found' })
   }
@@ -64,8 +72,14 @@ const updateStatusContact = async (req, res) => {
   if (req.body.favorite === undefined) return res.status(400).json({ message: 'missing field favorite' })
   const { favorite } = req.body
   try {
-    const updateContactStatus = await Contact.findByIdAndUpdate(id, { $set: { favorite } }, { new: true })
-    return res.status(200).json(updateContactStatus)
+    const updatedContact = await Contact.findOneAndUpdate({ _id: id, owner: req.user.id }, { $set: { favorite } }, { new: true })
+    const updatedData = {
+      name: updatedContact.name,
+      email: updatedContact.email,
+      phone: updatedContact.phone,
+      favorite: updatedContact.favorite
+    }
+    return res.status(200).json(updatedData)
   } catch (error) {
     return res.status(404).json({ message: 'Not found' })
   }

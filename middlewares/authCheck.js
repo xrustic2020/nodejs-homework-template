@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 const User = require('../db/userSchema')
 
 const checkedAuth = async (req, res, next) => {
+  console.log('Auth middleware - - -') // for testing only
   try {
     const { authorization } = req.headers
     const [, token] = authorization.split(' ')
