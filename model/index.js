@@ -1,14 +1,18 @@
 const Joi = require('joi')
 const { addedContactSchema } = require('../validations/contactsSchema')
 const Contact = require('../db/contactsModel')
-const { signupUser, loginUser, logoutUser, getCurrentUser } = require('./usersModel')
+const { signupUser, loginUser, logoutUser, getCurrentUser, updateSubscription } = require('./usersModel')
 
 // TODO: Вынести логику с контактами в отдельный файл, а в индекс оставить только ипорты всего
 
 const listContacts = async (req, res) => {
-  const { page = 1, limit = 5 } = req.query
+  const { page = 1, limit = 5, favorite } = req.query
   try {
-    const contacts = await Contact.paginate({ owner: req.user.id }, { page, limit })
+    let contacts
+    favorite
+      ? contacts = await Contact.paginate({ owner: req.user.id, favorite }, { page, limit })
+      : contacts = await Contact.paginate({ owner: req.user.id }, { page, limit })
+
     const { docs, totalDocs } = contacts
     return res.status(200).json({ contacts: docs, totalDocs, limit, page })
   } catch (error) {
@@ -95,5 +99,6 @@ module.exports = {
   signupUser,
   loginUser,
   logoutUser,
-  getCurrentUser
+  getCurrentUser,
+  updateSubscription
 }
