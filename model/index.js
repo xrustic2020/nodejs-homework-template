@@ -1,7 +1,7 @@
 const Joi = require('joi')
 const { addedContactSchema } = require('../validations/contactsSchema')
 const Contact = require('../db/contactsModel')
-const { signupUser, loginUser } = require('./usersModel')
+const { signupUser, loginUser, logoutUser, getCurrentUser } = require('./usersModel')
 
 // TODO: Вынести логику с контактами в отдельный файл, а в индекс оставить только ипорты всего
 
@@ -79,5 +79,7 @@ module.exports = {
   updateContact,
   updateStatusContact,
   signupUser,
-  loginUser
+  loginUser,
+  logoutUser,
+  getCurrentUser
 }

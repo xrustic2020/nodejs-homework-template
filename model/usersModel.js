@@ -52,7 +52,27 @@ const loginUser = async (req, res) => {
   }
 }
 
+const logoutUser = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user.id, { $set: { token: null } }, { new: true })
+    res.sendStatus(204)
+  } catch (error) {
+    res.status(401).json({ message: 'Not authorized' })
+  }
+}
+
+const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.user.id }, { email: 1, subscription: 1, _id: 0 })
+    res.status(200).json(user)
+  } catch (error) {
+    res.status(401).json({ message: 'Not authorized' })
+  }
+}
+
 module.exports = {
   signupUser,
-  loginUser
+  loginUser,
+  logoutUser,
+  getCurrentUser
 }
