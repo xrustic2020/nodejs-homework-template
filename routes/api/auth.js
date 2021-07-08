@@ -1,12 +1,12 @@
 const express = require('express')
 const router = express.Router()
 const { signupUser, loginUser, logoutUser, getCurrentUser, updateSubscription } = require('../../model')
-const authCheck = require('../../middlewares/authCheck')
+const { authTokenCheck, authUserValidations, subscriptionUserValidation, checkMissingFields } = require('../../middlewares')
 
-router.post('/signup', signupUser)
-router.post('/login', loginUser)
-router.post('/logout', authCheck, logoutUser)
-router.get('/current', authCheck, getCurrentUser)
-router.patch('/', authCheck, updateSubscription)
+router.post('/signup', authUserValidations, signupUser)
+router.post('/login', authUserValidations, loginUser)
+router.post('/logout', authTokenCheck, logoutUser)
+router.get('/current', authTokenCheck, getCurrentUser)
+router.patch('/', checkMissingFields, subscriptionUserValidation, authTokenCheck, updateSubscription)
 
 module.exports = router
