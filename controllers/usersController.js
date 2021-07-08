@@ -1,4 +1,4 @@
-const { hashingPassword, signupNewUser, findOneDoc, comparePassword, signToken, updateDoc } = require('../services')
+const { hashingPassword, signupNewUser, findUser, comparePassword, signToken, updateUserFields } = require('../services')
 
 const signupUser = async (req, res) => {
   const password = await hashingPassword(req.body.password)
@@ -15,19 +15,14 @@ const signupUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { email, password } = req.body
   try {
-    const user = await findOneDoc({ email })
+    const user = await findUser({ email })
+    if (!user) throw new Error('Email or password is wrong')
     const isValidPassword = await comparePassword(password, user.password)
     if (!isValidPassword) throw new Error('Email or password is wrong')
     const token = signToken(user.email, user._id)
-    await updateDoc({ email }, { token })
+    const updatedUser = await updateUserFields({ email }, { token })
 
-    res.status(200).json({
-      token,
-      user: {
-        email: user.email,
-        subscription: user.subscription
-      }
-    })
+    res.status(200).json({ token, user: updatedUser })
   } catch (error) {
     res.json({ message: error.message }).status(401)
   }
@@ -35,7 +30,7 @@ const loginUser = async (req, res) => {
 
 const logoutUser = async (req, res) => {
   try {
-    await updateDoc({ _id: req.user.id }, { token: null })
+    await updateUserFields({ _id: req.user.id }, { token: null })
     res.sendStatus(204)
   } catch (error) {
     res.status(401).json({ message: 'Not authorized' })
@@ -44,7 +39,7 @@ const logoutUser = async (req, res) => {
 
 const getCurrentUser = async (req, res) => {
   try {
-    const user = await findOneDoc({ _id: req.user.id }, { email: 1, subscription: 1, _id: 0 })
+    const user = await findUser({ _id: req.user.id }, { email: 1, subscription: 1, _id: 0 })
     res.status(200).json(user)
   } catch (error) {
     res.status(401).json({ message: 'Not authorized' })
@@ -54,8 +49,8 @@ const getCurrentUser = async (req, res) => {
 const updateSubscription = async (req, res) => {
   const { subscription } = req.body
   try {
-    const updateUser = await updateDoc({ _id: req.user.id }, { subscription })
-    return res.status(200).json({ email: updateUser.email, subscription: updateUser.subscription })
+    const updateUser = await updateUserFields({ _id: req.user.id }, { subscription })
+    return res.status(200).json(updateUser)
   } catch (error) {
     return res.status(404).json({ message: error.message })
   }

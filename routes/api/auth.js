@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { signupUser, loginUser, logoutUser, getCurrentUser, updateSubscription } = require('../../model')
+const { signupUser, loginUser, logoutUser, getCurrentUser, updateSubscription } = require('../../controllers')
 const { authTokenCheck, authUserValidations, subscriptionUserValidation, checkMissingFields } = require('../../middlewares')
 
 router.post('/signup', authUserValidations, signupUser)

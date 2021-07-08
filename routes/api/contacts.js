@@ -7,13 +7,15 @@ const {
   addContact,
   updateContact,
   updateStatusContact
-} = require('../../model')
+} = require('../../controllers')
+
+const { newContactValidation, checkMissingFields } = require('../../middlewares')
 
 router.get('/', listContacts)
 router.get('/:contactId', getContactById)
-router.post('/', addContact)
-router.patch('/:contactId/favorite', updateStatusContact)
+router.post('/', newContactValidation, addContact)
+router.patch('/:contactId/favorite', checkMissingFields, updateStatusContact)
 router.delete('/:contactId', removeContact)
-router.put('/:contactId', updateContact)
+router.put('/:contactId', checkMissingFields, updateContact)
 
 module.exports = router

@@ -1,15 +1,13 @@
-const jwt = require('jsonwebtoken')
-const User = require('../db/userSchema')
+const { decodeToken, findUser } = require('../services')
 
 const authTokenCheck = async (req, res, next) => {
-  console.log('Auth middleware - - -') // for testing only
   try {
     const { authorization } = req.headers
     const [, token] = authorization.split(' ')
-    const user = jwt.decode(token, process.env.JWT_SECRET)
+    const user = decodeToken(token)
     if (!user) throw new Error()
 
-    const foundedUser = await User.findOne({ _id: user.id })
+    const foundedUser = await findUser({ _id: user.id })
     if (foundedUser.token !== token) throw new Error()
     const { email, _id: id, subscription } = foundedUser
     req.user = { email, id, subscription }

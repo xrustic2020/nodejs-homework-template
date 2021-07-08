@@ -2,8 +2,6 @@ const Joi = require('joi')
 const { subscriptionUserSchema } = require('../../validations/schemas/subscriptionSchema')
 
 const subscriptionUserValidation = (req, res, next) => {
-  console.log('Joi Subscription validation middleware - - -') // for testing only
-
   try {
     Joi.assert(req.body, subscriptionUserSchema)
     next()
