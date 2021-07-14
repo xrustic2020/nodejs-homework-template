@@ -1,4 +1,4 @@
-const { hashingPassword, signupNewUser, findUser, comparePassword, signToken, updateUserFields } = require('../services')
+const { hashingPassword, signupNewUser, findUser, comparePassword, signToken, updateUserFields, saveUserAvatar } = require('../services')
 
 const signupUser = async (req, res) => {
   const password = await hashingPassword(req.body.password)
@@ -38,9 +38,9 @@ const logoutUser = async (req, res) => {
 }
 
 const getCurrentUser = async (req, res) => {
+  const { email, subscription } = req.user
   try {
-    const user = await findUser({ _id: req.user.id }, { email: 1, subscription: 1, _id: 0 })
-    res.status(200).json(user)
+    res.status(200).json({ email, subscription })
   } catch (error) {
     res.status(401).json({ message: 'Not authorized' })
   }
@@ -56,10 +56,24 @@ const updateSubscription = async (req, res) => {
   }
 }
 
+const updateAvatar = async (req, res) => {
+  const { id } = req.user
+  const { tmpPath, extension } = req.avatar
+  const avatarURL = `public/avatars/${id}.${extension}`
+  try {
+    saveUserAvatar(tmpPath, avatarURL)
+    const updateUser = await updateUserFields({ _id: id }, { avatarURL })
+    return res.status(200).json(updateUser)
+  } catch (error) {
+    return res.status(404).json({ message: error.message })
+  }
+}
+
 module.exports = {
   signupUser,
   loginUser,
   logoutUser,
   getCurrentUser,
-  updateSubscription
+  updateSubscription,
+  updateAvatar
 }

@@ -6,6 +6,7 @@ const decodeToken = require('./secure/decodeToken')
 const signupNewUser = require('./users/signupNewUser')
 const findUser = require('./users/findUser')
 const updateUserFields = require('./users/updateUserFields')
+const saveUserAvatar = require('./users/saveUserAvatar')
 
 const createNewContact = require('./contacts/createNewContact')
 const findContact = require('./contacts/findContact')
@@ -22,6 +23,7 @@ module.exports = {
   signupNewUser,
   findUser,
   updateUserFields,
+  saveUserAvatar,
 
   createNewContact,
   findContact,

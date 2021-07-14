@@ -12,7 +12,8 @@ const {
   loginUser,
   logoutUser,
   getCurrentUser,
-  updateSubscription
+  updateSubscription,
+  updateAvatar
 } = require('./usersController')
 
 module.exports = {
@@ -27,5 +28,6 @@ module.exports = {
   loginUser,
   logoutUser,
   getCurrentUser,
-  updateSubscription
+  updateSubscription,
+  updateAvatar
 }
