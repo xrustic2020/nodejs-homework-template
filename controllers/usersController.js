@@ -16,6 +16,7 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body
   try {
     const user = await findUser({ email })
+    if (!user.verify) throw new Error('Please, verify you email')
     if (!user) throw new Error('Email or password is wrong')
     const isValidPassword = await comparePassword(password, user.password)
     if (!isValidPassword) throw new Error('Email or password is wrong')
@@ -69,11 +70,22 @@ const updateAvatar = async (req, res) => {
   }
 }
 
+const emailVerification = async (req, res) => {
+  const verifyToken = req.params.verificationToken
+  try {
+    await updateUserFields({ verifyToken }, { verifyToken: null, verify: true })
+    return res.status(200).json({ message: 'Verification successful' })
+  } catch (error) {
+    return res.status(404).json({ message: 'User not found' })
+  }
+}
+
 module.exports = {
   signupUser,
   loginUser,
   logoutUser,
   getCurrentUser,
   updateSubscription,
-  updateAvatar
+  updateAvatar,
+  emailVerification
 }

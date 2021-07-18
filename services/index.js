@@ -7,6 +7,7 @@ const signupNewUser = require('./users/signupNewUser')
 const findUser = require('./users/findUser')
 const updateUserFields = require('./users/updateUserFields')
 const saveUserAvatar = require('./users/saveUserAvatar')
+const sendEmail = require('./users/sendEmail')
 
 const createNewContact = require('./contacts/createNewContact')
 const findContact = require('./contacts/findContact')
@@ -24,6 +25,7 @@ module.exports = {
   findUser,
   updateUserFields,
   saveUserAvatar,
+  sendEmail,
 
   createNewContact,
   findContact,
