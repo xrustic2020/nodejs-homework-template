@@ -14,7 +14,8 @@ const {
   getCurrentUser,
   updateSubscription,
   updateAvatar,
-  emailVerification
+  emailVerification,
+  resendingVerificationEmail
 } = require('./usersController')
 
 module.exports = {
@@ -31,5 +32,6 @@ module.exports = {
   getCurrentUser,
   updateSubscription,
   updateAvatar,
-  emailVerification
+  emailVerification,
+  resendingVerificationEmail
 }
