@@ -1,4 +1,4 @@
-const { hashingPassword, signupNewUser, findUser, comparePassword, signToken, updateUserFields, saveUserAvatar } = require('../services')
+const { hashingPassword, signupNewUser, findUser, comparePassword, signToken, updateUserFields, saveUserAvatar, sendEmail } = require('../services')
 
 const signupUser = async (req, res) => {
   const password = await hashingPassword(req.body.password)
@@ -16,6 +16,7 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body
   try {
     const user = await findUser({ email })
+    if (!user.verify) throw new Error('Please, verify you email')
     if (!user) throw new Error('Email or password is wrong')
     const isValidPassword = await comparePassword(password, user.password)
     if (!isValidPassword) throw new Error('Email or password is wrong')
@@ -69,11 +70,37 @@ const updateAvatar = async (req, res) => {
   }
 }
 
+const emailVerification = async (req, res) => {
+  const verifyToken = req.params.verificationToken
+  try {
+    await updateUserFields({ verifyToken }, { verifyToken: null, verify: true })
+    return res.status(200).json({ message: 'Verification successful' })
+  } catch (error) {
+    return res.status(404).json({ message: 'User not found' })
+  }
+}
+
+const resendingVerificationEmail = async (req, res) => {
+  const { email } = req.body
+  try {
+    const user = await findUser({ email })
+    console.log('verifyToken:', user.verifyToken)
+    if (user.verify) throw new Error('Verification has already been passed')
+    if (!user.verifyToken) throw new Error('Verification has already been passed')
+    sendEmail(email, user.verifyToken)
+    return res.status(200).json({ message: 'Verification email sent' })
+  } catch (error) {
+    return res.status(400).json({ message: error.message })
+  }
+}
+
 module.exports = {
   signupUser,
   loginUser,
   logoutUser,
   getCurrentUser,
   updateSubscription,
-  updateAvatar
+  updateAvatar,
+  emailVerification,
+  resendingVerificationEmail
 }
